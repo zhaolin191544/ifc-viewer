@@ -1,19 +1,37 @@
 <template>
-  <div class="relative w-full h-screen flex justify-center items-center bg-gray-100">
-    
-    <input
-      type="file"
-      accept=".ifc"
-      @change="loadIfcFile"
-      class="absolute top-4 left-4 z-10 p-2 bg-white rounded shadow-md text-sm file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-    />
-
-    <div 
-      ref="canvasContainer" 
-      class="w-4/5 h-4/5 rounded-lg shadow-xl"
-    >
+  <div class="min-h-screen flex flex-col bg-slate-100">
+    <header class="w-full bg-white shadow-sm">
+      <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4 px-6 py-5">
+        <h1 class="text-xl font-semibold text-slate-700">IFC Viewer</h1>
+        <label class="inline-flex items-center gap-3 cursor-pointer">
+          <span
+            class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium shadow-sm transition-colors hover:bg-blue-500"
+          >
+            选择 IFC 文件
+          </span>
+          <input
+            type="file"
+            accept=".ifc"
+            @change="loadIfcFile"
+            class="sr-only"
+          />
+        </label>
       </div>
-  
+    </header>
+
+    <main class="flex-1 flex items-center justify-center px-6 py-10">
+      <div
+        ref="canvasContainer"
+        class="relative w-[80vw] h-[80vh] max-w-full max-h-full bg-slate-300 border border-slate-200 rounded-2xl shadow-2xl overflow-hidden"
+      >
+        <p
+          v-if="!hasModelLoaded"
+          class="absolute inset-0 flex items-center justify-center text-sm text-slate-500 tracking-wide"
+        >
+          等待加载 IFC 模型…
+        </p>
+      </div>
+    </main>
   </div>
 </template>
 
@@ -24,6 +42,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { IFCLoader } from 'web-ifc-three/IFCLoader'; 
 
 const canvasContainer = ref<HTMLDivElement | null>(null);
+const hasModelLoaded = ref(false);
 
 // 将核心 Three.js 对象提升到 setup 作用域
 let scene: THREE.Scene;
@@ -31,6 +50,7 @@ let renderer: THREE.WebGLRenderer;
 let camera: THREE.PerspectiveCamera;
 let ifcLoader: IFCLoader;
 let controls: OrbitControls; // 提升 controls
+let currentModel: THREE.Object3D | null = null;
 
 // 存储 resize-handler 以便后续移除
 let resizeHandler: () => void;
@@ -74,7 +94,7 @@ onMounted(() => {
 
   // 1. 场景
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xeeeeee);
+  scene.background = new THREE.Color(0xd1d5db);
 
   // 2. 相机 (aspect 暂时给 1, resizeHandler 会修复它)
   camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
@@ -82,6 +102,7 @@ onMounted(() => {
 
   // 3. 渲染器 (先添加，后设置大小)
   renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setClearColor(0xd1d5db);
   container.appendChild(renderer.domElement); 
 
   // 4. 光源
@@ -154,19 +175,27 @@ const loadIfcFile = (event: Event) => {
 
   const url = URL.createObjectURL(file);
 
+  hasModelLoaded.value = false;
+
   try {
     ifcLoader.load(
       url,
       (model) => {
         console.log("模型加载成功!", model);
-        const ifcModel = model as THREE.Object3D;
-        scene.add(ifcModel);
-        
+        if (currentModel) {
+          scene.remove(currentModel);
+        }
+
+        currentModel = model as THREE.Object3D;
+        scene.add(currentModel);
+
         // ****************************
         // ***** 修复 2: 调用对焦 *****
         // ****************************
-        frameModel(ifcModel);
-        
+        frameModel(currentModel);
+
+        hasModelLoaded.value = true;
+
         URL.revokeObjectURL(url);
       },
       undefined,
