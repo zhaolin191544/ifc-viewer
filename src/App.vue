@@ -536,11 +536,7 @@ function clearSelection() {
 
   if (ifcLoader && currentModelID != null && highlightMaterial && scene) {
     try {
-      ifcLoader.ifcManager.removeSubset(
-        currentModelID,
-        highlightMaterial,
-        scene,
-      )
+      ifcLoader.ifcManager.removeSubset(currentModelID, highlightMaterial)
     } catch (e) {
       console.warn('移除高亮子集失败:', e)
     }
@@ -706,15 +702,15 @@ onMounted(() => {
     }
 
     const intersect = intersects[0]
-    if (intersect.faceIndex == null) return
+    if (intersect!.faceIndex == null) return
 
-    const mesh = intersect.object as any
+    const mesh = intersect!.object as any
     const geometry = mesh.geometry as THREE.BufferGeometry
 
     try {
       const expressID = ifcLoader!.ifcManager.getExpressId(
         geometry,
-        intersect.faceIndex,
+        intersect!.faceIndex,
       )
       const modelID = mesh.modelID ?? currentModelID
       if (modelID == null) return
@@ -868,7 +864,7 @@ const loadIfcFile = (event: Event) => {
           scene!.remove(currentModel)
         }
 
-        currentModel = model as THREE.ObjectD
+        currentModel = model as THREE.Object3D
         currentModelID = (currentModel as any).modelID ?? 0
         scene!.add(currentModel)
 
