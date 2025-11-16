@@ -1,363 +1,388 @@
 <template>
-  <div>
-    <div class="silk-container">
-      <Silk
-        :speed="5"
-        :scale="1"
-        :color="'#7B7481'"
-        :noise-intensity="1.5"
-        :rotation="0"
-        class="w-full h-full"
-      />
-    </div>
+  <div class="silk-container">
+    <Silk
+      :speed="5"
+      :scale="1"
+      :color="'#7B7481'"
+      :noise-intensity="1.5"
+      :rotation="0"
+      class="w-full h-full"
+    />
+  </div>
 
-    <div class="min-h-screen text-slate-100 flex flex-col relative z-10">
-      <header class="w-full z-20 relative">
-  <div class="max-w-6xl mx-auto px-6 mt-6 lg:mt-8">
-    <div
-      class="w-full flex flex-wrap items-center justify-between gap-4 px-6 py-4
-             border border-slate-800 bg-slate-900/80 backdrop-blur rounded-xl"
+  <div
+    class="min-h-screen text-slate-100 flex flex-col items-center
+           p-6 lg:p-8 space-y-5 lg:space-y-6 relative z-10"
+  >
+    <header
+      class="w-full max-w-6xl
+             border border-slate-800 bg-slate-900/80 backdrop-blur rounded-xl
+             shadow-xl shadow-black/40"
     >
-      <div class="flex items-center gap-3">
-        <div>
-          <h1 class="text-lg font-semibold tracking-tight">IFC Viewer</h1>
+      <div
+        class="flex flex-wrap items-center justify-between gap-4 px-6 py-4"
+      >
+        <div class="flex items-center gap-3">
+          <div>
+            <h1 class="text-lg font-semibold tracking-tight">IFC Viewer</h1>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div
+            v-if="selectedFileName"
+            class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-xs"
+          >
+            <svg
+              class="w-3.5 h-3.5 text-blue-400"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M14 3H6a2 2 0 0 0-2 2v14.5A1.5 1.5 0 0 0 5.5 21h13A1.5 1.5 0 0 0 20 19.5V9l-6-6Z"
+                stroke="currentColor"
+                stroke-width="1.4"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M14 3v4a2 2 0 0 0 2 2h4"
+                stroke="currentColor"
+                stroke-width="1.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span class="max-w-[180px] truncate">
+              {{ selectedFileName }}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            @click="resetView"
+            class="hidden sm:inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full
+                   border border-slate-700 bg-slate-800/60 hover:border-cyan-500 hover:bg-slate-800/90 transition-all text-cyan-200"
+          >
+            <svg
+              class="w-3.5 h-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M4 4v6h6"
+                stroke="currentColor"
+                stroke-width="1.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M20 20v-6h-6"
+                stroke="currentColor"
+                stroke-width="1.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M5 13a7 7 0 0 0 11.9 4.95L20 15"
+                stroke="currentColor"
+                stroke-width="1.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M19 11A7 7 0 0 0 7.1 6.07L4 9"
+                stroke="currentColor"
+                stroke-width="1.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span>重置视角</span>
+          </button>
+
+          <label
+            class="inline-flex items-center gap-2 cursor-pointer px-4 py-2 rounded-full
+                   bg-gradient-to-r from-teal-500 to-emerald-400 text-xs font-medium
+                   shadow-lg shadow-teal-500/30 hover:from-teal-400 hover:to-emerald-300 transition-all"
+          >
+            <svg
+              class="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v1a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-1"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span>选择 IFC 文件</span>
+            <input
+              type="file"
+              accept=".ifc"
+              @change="loadIfcFile"
+              class="sr-only"
+            />
+          </label>
         </div>
       </div>
+    </header>
 
-      <div class="flex items-center gap-3">
-        <div
-          v-if="selectedFileName"
-          class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-xs"
+    <main class="flex-1 w-full max-w-6xl">
+      <div
+        class="grid grid-cols-1 lg:grid-cols-[260px,minmax(0,1.4fr),260px] gap-5 lg:gap-6 h-full"
+      >
+        <section
+          class="hidden lg:flex flex-col gap-4 bg-slate-900/70 border border-slate-800 rounded-2xl p-4 shadow-xl shadow-black/40"
         >
-          <svg
-            class="w-3.5 h-3.5 text-blue-400"
-            viewBox="0 0 24 24"
-            fill="none"
+          <h2 class="text-xs font-semibold text-slate-300 tracking-wide">
+            模型信息
+          </h2>
+          <div class="space-y-3 text-xs text-slate-400">
+            <p v-if="selectedFileName">
+              <span class="text-slate-500">文件名：</span>
+              <span class="break-all text-slate-200">
+                {{ selectedFileName }}
+              </span>
+            </p>
+            <p v-if="modelStats.elementCount != null">
+              <span class="text-slate-500">节点数量：</span>
+              <span class="text-slate-200">
+                {{ modelStats.elementCount }}
+              </span>
+            </p>
+            <p v-if="modelStats.levelCount != null">
+              <span class="text-slate-500">楼层数量：</span>
+              <span class="text-slate-200">
+                {{ modelStats.levelCount }}
+              </span>
+            </p>
+
+            <div class="mt-4 border-t border-slate-800 pt-3">
+              <p class="text-[11px] text-slate-500 mb-1">操作提示</p>
+              <ul class="space-y-1">
+                <li>• 鼠标左键：旋转模型</li>
+                <li>• 鼠标滚轮：缩放</li>
+                <li>• 鼠标右键：平移视图</li>
+                <li>• 单击构件：选中并高亮</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="mt-4 border-t border-slate-800 pt-3 space-y-2">
+            <p class="text-[11px] text-slate-500">选中构件</p>
+            <div
+              v-if="selectedElementId != null"
+              class="rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-2.5 space-y-1 text-xs"
+            >
+              <p>
+                <span class="text-slate-500">ID：</span>
+                <span class="text-slate-200">{{ selectedElementId }}</span>
+              </p>
+              <p v-if="selectedElementType">
+                <span class="text-slate-500">类型：</span>
+                <span class="text-slate-200">{{ selectedElementType }}</span>
+              </p>
+              <p v-if="selectedElementName">
+                <span class="text-slate-500">名称：</span>
+                <span class="text-slate-200">{{ selectedElementName }}</span>
+              </p>
+            </div>
+            <p v-else class="text-[11px] text-slate-500">
+              暂无选中构件，单击模型即可选中。
+            </p>
+          </div>
+        </section>
+
+        <section
+          class="relative bg-slate-900/70 border border-slate-800 rounded-3xl shadow-2xl shadow-black/50 overflow-hidden"
+        >
+          <div
+            class="absolute left-4 top-4 z-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full
+                   bg-slate-900/80 border border-slate-700 text-[11px] text-cyan-200"
           >
-            <path
-              d="M14 3H6a2 2 0 0 0-2 2v14.5A1.5 1.5 0 0 0 5.5 21h13A1.5 1.5 0 0 0 20 19.5V9l-6-6Z"
-              stroke="currentColor"
-              stroke-width="1.4"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M14 3v4a2 2 0 0 0 2 2h4"
-              stroke="currentColor"
-              stroke-width="1.4"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          <span class="max-w-[180px] truncate">
-            {{ selectedFileName }}
+            <span
+              class="inline-flex h-1.5 w-1.5 rounded-full"
+              :class="hasModelLoaded ? 'bg-emerald-400' : 'bg-slate-500'"
+            ></span>
+            <span>
+              {{ hasModelLoaded ? '模型已加载' : '等待加载 IFC 模型' }}
+            </span>
+          </div>
+
+          <div
+            class="absolute right-4 bottom-4 z-10 flex flex-col gap-2"
+          >
+            <button
+              type="button"
+              @click="setView('top')"
+              class="px-3 py-1.5 text-[11px] rounded-full
+                     border border-slate-700 bg-slate-900/80 hover:border-cyan-400 hover:bg-slate-900 transition-all text-cyan-200"
+            >
+              Top
+            </button>
+            <button
+              type="button"
+              @click="setView('front')"
+              class="px-3 py-1.5 text-[11px] rounded-full
+                     border border-slate-700 bg-slate-900/80 hover:border-cyan-400 hover:bg-slate-900 transition-all text-cyan-200"
+            >
+              Front
+            </button>
+            <button
+              type="button"
+              @click="setView('iso')"
+              class="px-3 py-1.5 text-[11px] rounded-full
+                     border border-slate-700 bg-slate-900/80 hover:border-cyan-400 hover:bg-slate-900 transition-all text-cyan-200"
+            >
+              ISO
+            </button>
+          </div>
+
+          <div
+            ref="canvasContainer"
+            class="w-full h-[60vh] md:h-[70vh] lg:h-[72vh]"
+          ></div>
+
+          <div
+            v-if="!hasModelLoaded || isLoading"
+            class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm text-sm text-slate-300"
+          >
+            <svg
+              class="w-7 h-7 mb-4 animate-spin text-blue-400"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <circle
+                class="opacity-20"
+                cx="12"
+                cy="12"
+                r="9"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <path
+                d="M21 12a9 9 0 0 0-9-9"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+            <p class="tracking-wide mb-1">
+              {{
+                isLoading
+                  ? '正在解析 IFC 模型…'
+                  : '请选择左上角的 IFC 文件进行加载'
+              }}
+            </p>
+            <p class="text-xs text-slate-500">大文件加载时间可能稍长</p>
+          </div>
+        </section>
+
+        <section
+          class="hidden lg:flex flex-col gap-4 bg-slate-900/70 border border-slate-800 rounded-2xl p-4 shadow-xl shadow-black/40"
+        >
+          <h2 class="text-xs font-semibold text-slate-300 tracking-wide">
+            视图与显示
+          </h2>
+
+          <div class="space-y-3 text-xs text-slate-300">
+            <label class="flex items-center justify-between gap-2">
+              <span>显示线框</span>
+              <input
+                type="checkbox"
+                v-model="options.showWireframe"
+                class="h-3.5 w-3.5 rounded border-slate-600 bg-slate-900"
+              />
+            </label>
+            <label class="flex items-center justify-between gap-2">
+              <span>楼层剖切（水平）</span>
+              <input
+                type="checkbox"
+                v-model="options.enableSection"
+                class="h-3.5 w-3.5 rounded border-slate-600 bg-slate-900"
+              />
+            </label>
+            <label class="flex items-center justify-between gap-2">
+              <span>显示坐标轴</span>
+              <input
+                type="checkbox"
+                v-model="options.showAxes"
+                class="h-3.5 w-3.5 rounded border-slate-600 bg-slate-900"
+              />
+            </label>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+  <button
+    type="button"
+    @click="focusSelection"
+    class="px-3 py-1.5 text-[11px] rounded-full
+           border border-slate-700 bg-slate-800/60 hover:border-cyan-500 text-cyan-200"
+  >
+    聚焦选中构件
+  </button>
+  
+<button
+  type="button"
+  @click="toggleXRay"
+  class="px-3 py-1.5 text-[11px] rounded-full
+         border bg-slate-800/60 hover:border-cyan-500 text-cyan-200"
+  :class="[
+    xRayEnabled ? 'border-cyan-500' : 'border-slate-700'
+  ]"
+>
+  X-Ray 模式
+</button>
+</div>
+        </section>
+      </div>
+    </main>
+
+    <footer
+      class="w-full max-w-6xl
+             border border-slate-800 bg-slate-900/90 backdrop-blur
+             text-[11px] text-slate-400 rounded-xl
+             shadow-xl shadow-black/40"
+    >
+      <div
+        class="px-6 py-2 flex items-center justify-between gap-3"
+      >
+        <div class="flex items-center gap-2">
+          <span class="text-slate-500">状态：</span>
+          <span>
+            {{
+              isLoading
+                ? '模型加载中…'
+                : hasModelLoaded
+                ? '就绪'
+                : '等待选择 IFC 文件'
+            }}
           </span>
         </div>
-
-        <button
-          type="button"
-          @click="resetView"
-          class="hidden sm:inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-slate-700 bg-slate-900/60 hover:border-blue-500 hover:bg-slate-900/90 transition-all"
-        >
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M4 4v6h6"
-              stroke="currentColor"
-              stroke-width="1.4"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M20 20v-6h-6"
-              stroke="currentColor"
-              stroke-width="1.4"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M5 13a7 7 0 0 0 11.9 4.95L20 15"
-              stroke="currentColor"
-              stroke-width="1.4"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M19 11A7 7 0 0 0 7.1 6.07L4 9"
-              stroke="currentColor"
-              stroke-width="1.4"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          <span>重置视角</span>
-        </button>
-
-        <label
-          class="inline-flex items-center gap-2 cursor-pointer px-4 py-2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 text-xs font-medium shadow-lg shadow-blue-500/30 hover:from-blue-400 hover:to-cyan-300 transition-all"
-        >
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v1a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-1"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          <span>选择 IFC 文件</span>
-          <input
-            type="file"
-            accept=".ifc"
-            @change="loadIfcFile"
-            class="sr-only"
-          />
-        </label>
-      </div>
-    </div>
-  </div>
-</header>
-
-      <main class="flex-1">
-        <div
-          class="max-w-6xl mx-auto px-6 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-[260px,minmax(0,1.4fr),260px] gap-5 lg:gap-6"
-        >
-          <section
-            class="hidden lg:flex flex-col gap-4 bg-slate-900/70 border border-slate-800 rounded-2xl p-4 shadow-xl shadow-black/40"
-          >
-            <h2 class="text-xs font-semibold text-slate-300 tracking-wide">
-              模型信息
-            </h2>
-            <div class="space-y-3 text-xs text-slate-400">
-              <p v-if="selectedFileName">
-                <span class="text-slate-500">文件名：</span>
-                <span class="break-all text-slate-200">
-                  {{ selectedFileName }}
-                </span>
-              </p>
-              <p v-if="modelStats.elementCount != null">
-                <span class="text-slate-500">节点数量：</span>
-                <span class="text-slate-200">
-                  {{ modelStats.elementCount }}
-                </span>
-              </p>
-              <p v-if="modelStats.levelCount != null">
-                <span class="text-slate-500">楼层数量：</span>
-                <span class="text-slate-200">
-                  {{ modelStats.levelCount }}
-                </span>
-              </p>
-
-              <div class="mt-4 border-t border-slate-800 pt-3">
-                <p class="text-[11px] text-slate-500 mb-1">操作提示</p>
-                <ul class="space-y-1">
-                  <li>• 鼠标左键：旋转模型</li>
-                  <li>• 鼠标滚轮：缩放</li>
-                  <li>• 鼠标右键：平移视图</li>
-                  <li>• 单击构件：选中并高亮</li>
-                </ul>
-              </div>
-            </div>
-
-            <div class="mt-4 border-t border-slate-800 pt-3 space-y-2">
-              <p class="text-[11px] text-slate-500">选中构件</p>
-              <div
-                v-if="selectedElementId != null"
-                class="rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-2.5 space-y-1 text-xs"
-              >
-                <p>
-                  <span class="text-slate-500">ID：</span>
-                  <span class="text-slate-200">{{ selectedElementId }}</span>
-                </p>
-                <p v-if="selectedElementType">
-                  <span class="text-slate-500">类型：</span>
-                  <span class="text-slate-200">{{
-                    selectedElementType
-                  }}</span>
-                </p>
-                <p v-if="selectedElementName">
-                  <span class="text-slate-500">名称：</span>
-                  <span class="text-slate-200">{{
-                    selectedElementName
-                  }}</span>
-                </p>
-              </div>
-              <p v-else class="text-[11px] text-slate-500">
-                暂无选中构件，单击模型即可选中。
-              </p>
-            </div>
-          </section>
-
-          <section
-            class="relative border border-slate-800 rounded-3xl shadow-2xl shadow-black/50 overflow-hidden"
-          >
-            <div
-              class="absolute left-4 top-4 z-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 border border-slate-700 text-[11px] text-slate-300"
-            >
-              <span
-                class="inline-flex h-1.5 w-1.5 rounded-full"
-                :class="hasModelLoaded ? 'bg-emerald-400' : 'bg-slate-500'"
-              ></span>
-              <span>
-                {{ hasModelLoaded ? '模型已加载' : '等待加载 IFC 模型' }}
-              </span>
-            </div>
-
-            <div class="absolute right-4 bottom-4 z-10 flex flex-col gap-2">
-              <button
-                type="button"
-                @click="setView('top')"
-                class="px-3 py-1.5 text-[11px] rounded-full border border-slate-700 bg-slate-900/80 hover:border-blue-400 hover:bg-slate-900 transition-all"
-              >
-                Top
-              </button>
-              <button
-                type="button"
-                @click="setView('front')"
-                class="px-3 py-1.5 text-[11px] rounded-full border border-slate-700 bg-slate-900/80 hover:border-blue-400 hover:bg-slate-900 transition-all"
-              >
-                Front
-              </button>
-              <button
-                type="button"
-                @click="setView('iso')"
-                class="px-3 py-1.5 text-[11px] rounded-full border border-slate-700 bg-slate-900/80 hover:border-blue-400 hover:bg-slate-900 transition-all"
-              >
-                ISO
-              </button>
-            </div>
-
-            <div
-              ref="canvasContainer"
-              class="w-full h-[60vh] md:h-[70vh] lg:h-[72vh]"
-            ></div>
-
-            <div
-              v-if="!hasModelLoaded || isLoading"
-              class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm text-sm text-slate-300"
-            >
-              <svg
-                class="w-7 h-7 mb-4 animate-spin text-blue-400"
-                viewBox="0 0 24 24"
-                fill="none"
-              >
-                <circle
-                  class="opacity-20"
-                  cx="12"
-                  cy="12"
-                  r="9"
-                  stroke="currentColor"
-                  stroke-width="2"
-                />
-                <path
-                  d="M21 12a9 9 0 0 0-9-9"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                />
-              </svg>
-              <p class="tracking-wide mb-1">
-                {{
-                  isLoading
-                    ? '正在解析 IFC 模型…'
-                    : '请选择左上角的 IFC 文件进行加载'
-                }}
-              </p>
-              <p class="text-xs text-slate-500">大文件加载时间可能稍长</p>
-            </div>
-          </section>
-
-          <section
-            class="hidden lg:flex flex-col gap-4 bg-slate-900/70 border border-slate-800 rounded-2xl p-4 shadow-xl shadow-black/40"
-          >
-            <h2 class="text-xs font-semibold text-slate-300 tracking-wide">
-              视图与显示
-            </h2>
-
-            <div class="space-y-3 text-xs text-slate-300">
-              <label class="flex items-center justify-between gap-2">
-                <span>显示线框</span>
-                <input
-                  type="checkbox"
-                  v-model="options.showWireframe"
-                  class="h-3.5 w-3.5 rounded border-slate-600 bg-slate-900"
-                />
-              </label>
-              <label class="flex items-center justify-between gap-2">
-                <span>楼层剖切（水平）</span>
-                <input
-                  type="checkbox"
-                  v-model="options.enableSection"
-                  class="h-3.5 w-3.5 rounded border-slate-600 bg-slate-900"
-                />
-              </label>
-              <label class="flex items-center justify-between gap-2">
-                <span>显示坐标轴</span>
-                <input
-                  type="checkbox"
-                  v-model="options.showAxes"
-                  class="h-3.5 w-3.5 rounded border-slate-600 bg-slate-900"
-                />
-              </label>
-            </div>
-
-            <div class="mt-4 border-t border-slate-800 pt-3 space-y-2">
-              <p class="text-[11px] text-slate-500">快捷操作</p>
-              <div class="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  @click="focusSelection"
-                  class="px-3 py-1.5 text-[11px] rounded-full border border-slate-700 bg-slate-900/60 hover:border-blue-500"
-                >
-                  聚焦选中构件
-                </button>
-                <button
-                  type="button"
-                  @click="toggleXRay"
-                  class="px-3 py-1.5 text-[11px] rounded-full border border-slate-700 bg-slate-900/60 hover:border-blue-500"
-                >
-                  X-Ray 模式
-                </button>
-              </div>
-            </div>
-          </section>
+        <div class="hidden sm:flex items-center gap-2">
+          <span class="text-slate-500">相机：</span>
+          <span>{{ cameraInfo }}</span>
         </div>
-      </main>
-
-<footer class="w-full relative">
-  <div class="max-w-6xl mx-auto px-6 mb-6 lg:mb-8">
-    <div
-      class="w-full flex items-center justify-between gap-3 px-6 py-2
-             border border-slate-800 bg-slate-900/90 backdrop-blur 
-             text-[11px] text-slate-400 rounded-xl"
-    >
-      <div class="flex items-center gap-2">
-        <span class="text-slate-500">状态：</span>
-        <span>
-          {{
-            isLoading
-              ? '模型加载中…'
-              : hasModelLoaded
-              ? '就绪'
-              : '等待选择 IFC 文件'
-          }}
-        </span>
       </div>
-      <div class="hidden sm:flex items-center gap-2">
-        <span class="text-slate-500">相机：</span>
-        <span>{{ cameraInfo }}</span>
-      </div>
-    </div>
-  </div>
-</footer>
-    </div>
+    </footer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue';
+import {
+  ref,
+  reactive,
+  onMounted,
+  onBeforeUnmount,
+  watch,
+} from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { IFCLoader } from 'web-ifc-three/IFCLoader';
-import Silk from './components/Silk.vue'; // 导入 Silk 组件
+import Silk from './components/Silk.vue'; 
 
 const canvasContainer = ref<HTMLDivElement | null>(null);
 
@@ -626,26 +651,22 @@ onMounted(() => {
   const container = canvasContainer.value;
 
   scene = new THREE.Scene();
-  // *** 修改：设置场景背景为透明 ***
-  scene.background = new THREE.Color(0x020617);
+  scene.background = null; 
 
   camera = new THREE.PerspectiveCamera(75, 1, 0.1, 2000);
   camera.position.set(0, 0, 10);
 
-  // *** 修改：设置渲染器为透明 ***
   renderer = new THREE.WebGLRenderer({
     antialias: true,
     alpha: true, // 启用 alpha 通道
   });
-  renderer.setClearColor(0x000000, 0); // 设置清除颜色为透明
+  renderer.setClearColor(0x000000, 0); 
+  
   renderer.setPixelRatio(window.devicePixelRatio);
-
-  // 关闭自动清除
-  renderer.autoClear = false;
-
+  renderer.autoClear = false; 
+  
   container.appendChild(renderer.domElement);
 
-  // 剖切平面
   clippingPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0);
 
   // 灯光
@@ -655,7 +676,6 @@ onMounted(() => {
   directionalLight.position.set(3, 5, 2);
   scene.add(directionalLight);
 
-  // --- 坐标轴专用场景和相机 ---
   axesScene = new THREE.Scene();
   const orthoSize = 8;
   axesCamera = new THREE.OrthographicCamera(
@@ -671,8 +691,6 @@ onMounted(() => {
   axesHelper = new THREE.AxesHelper(3);
   axesHelper.visible = options.showAxes;
   axesScene.add(axesHelper);
-  // --- 结束 ---
-
   // 控制器
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
@@ -739,9 +757,9 @@ onMounted(() => {
     }
   };
 
-  container.addEventListener('pointerdown', pointerHandler);
+container.addEventListener('pointerdown', pointerHandler);
 
-  // --- 修改：动画循环 (animate) ---
+  // 动画循环
   const animate = () => {
     requestAnimationFrame(animate);
     if (
@@ -760,36 +778,25 @@ onMounted(() => {
     const mainWidth = canvasContainer.value.clientWidth;
     const mainHeight = canvasContainer.value.clientHeight;
 
-    // 0. 手动清除画布
     renderer.clear();
 
-    // 1. 渲染主场景
     renderer.setViewport(0, 0, mainWidth, mainHeight);
     renderer.setScissor(0, 0, mainWidth, mainHeight);
     renderer.setScissorTest(true);
     renderer.render(scene, camera);
 
-    // 2. 渲染坐标轴场景
     if (options.showAxes && controls) {
-      // *** 这是正确的坐标轴相机控制逻辑 ***
-      // 1. 计算主相机相对于其 *目标* 的偏移向量
       axesOffset.subVectors(camera.position, controls.target);
-      // 2. 归一化并设置固定距离
       axesOffset.normalize().multiplyScalar(10);
-      // 3. 设置坐标轴相机的位置
       axesCamera.position.copy(axesOffset);
-      // 4. 确保坐标轴相机始终看向 (0,0,0)
       axesCamera.lookAt(0, 0, 0);
-      // *** 逻辑结束 ***
 
-      const axesViewportSize = 120; // 120x120 像素
-      const margin = 16; // 距离边缘 16px
+      const axesViewportSize = 120;
+      const margin = 16; 
 
-      // 计算视口位置（右上角）
       const viewportX = mainWidth - axesViewportSize - margin;
       const viewportY = mainHeight - axesViewportSize - margin;
 
-      // 清除深度缓冲区，确保坐标轴在最前面
       renderer.clearDepth();
 
       renderer.setViewport(
@@ -809,13 +816,11 @@ onMounted(() => {
       renderer.render(axesScene, axesCamera);
     }
 
-    // 3. 渲染状态
-    renderer.setScissorTest(false); // 重置
+    renderer.setScissorTest(false);
     const pos = camera.position;
     cameraInfo.value = `X: ${pos.x.toFixed(1)}  Y: ${pos.y.toFixed(1)}  Z: ${pos.z.toFixed(1)}`;
   };
   animate();
-  // --- 结束修改：animate ---
 });
 
 onBeforeUnmount(() => {
@@ -833,7 +838,6 @@ onBeforeUnmount(() => {
   }
 });
 
-// 选项联动：线框
 watch(
   () => options.showWireframe,
   (val) => {
@@ -843,7 +847,6 @@ watch(
   },
 );
 
-// 选项联动：坐标轴
 watch(
   () => options.showAxes,
   (val) => {
@@ -853,7 +856,6 @@ watch(
   },
 );
 
-// 选项联动：剖切平面
 watch(
   () => options.enableSection,
   (val) => {
@@ -899,7 +901,7 @@ const loadIfcFile = (event: Event) => {
           scene!.remove(currentModel);
         }
 
-        currentModel = model as THREE.Object3D;
+        currentModel = model as THREE.ObjectD;
         currentModelID = (currentModel as any).modelID ?? 0;
         scene!.add(currentModel);
 
@@ -936,14 +938,13 @@ const loadIfcFile = (event: Event) => {
 </script>
 
 <style scoped>
-/* *** 修改：Silk 背景容器样式 *** */
 .silk-container {
   width: 100%;
-  height: 100vh; /* 使用 vh 确保全屏 */
+  height: 100vh;
   position: fixed;
   overflow: hidden;
   top: 0;
   left: 0;
-  z-index: 0; /* 确保在最底层 */
+  z-index: 0; 
 }
 </style>
