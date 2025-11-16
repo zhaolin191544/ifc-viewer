@@ -44,45 +44,30 @@ import { IFCLoader } from 'web-ifc-three/IFCLoader';
 const canvasContainer = ref<HTMLDivElement | null>(null);
 const hasModelLoaded = ref(false);
 
-// 将核心 Three.js 对象提升到 setup 作用域
 let scene: THREE.Scene;
 let renderer: THREE.WebGLRenderer;
 let camera: THREE.PerspectiveCamera;
 let ifcLoader: IFCLoader;
-let controls: OrbitControls; // 提升 controls
+let controls: OrbitControls; 
 let currentModel: THREE.Object3D | null = null;
 
-// 存储 resize-handler 以便后续移除
 let resizeHandler: () => void;
 
-// ****************************
-// ***** 修复 2: 自动对焦功能 *****
-// ****************************
-/**
- * 计算模型的边界盒并自动将相机对准模型
- */
 function frameModel(model: THREE.Object3D) {
-  // 1. 计算模型的边界盒
   const bbox = new THREE.Box3().setFromObject(model);
   
-  // 2. 获取边界盒的中心点
   const center = bbox.getCenter(new THREE.Vector3());
   
-  // 3. 获取边界盒的尺寸
   const size = bbox.getSize(new THREE.Vector3());
   
-  // 4. 计算到相机的合适距离
   const maxDim = Math.max(size.x, size.y, size.z);
   const fov = camera.fov * (Math.PI / 180);
   let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
   
-  cameraZ *= 1.5; // 留出一些边距 (1.5x)
+  cameraZ *= 1.5;
   
-  // 5. 设置相机位置 (从中心点 + Z 轴偏移)
-  // (我们假设模型是 Y 轴朝上, 所以我们在 Z 轴上后退)
   camera.position.set(center.x, center.y, center.z + cameraZ);
   
-  // 6. 更新控制器（OrbitControls）的目标
   controls.target.copy(center);
   controls.update();
 }
@@ -92,34 +77,27 @@ onMounted(() => {
 
   const container = canvasContainer.value;
 
-  // 1. 场景
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xd1d5db);
 
-  // 2. 相机 (aspect 暂时给 1, resizeHandler 会修复它)
   camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-  camera.position.set(0, 0, 10); // 初始位置不重要了，frameModel 会覆盖
+  camera.position.set(0, 0, 10); 
 
-  // 3. 渲染器 (先添加，后设置大小)
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setClearColor(0xd1d5db);
   container.appendChild(renderer.domElement); 
 
-  // 4. 光源
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
   scene.add(ambientLight);
   const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
   directionalLight.position.set(1, 1, 1);
   scene.add(directionalLight);
 
-  // 5. 控制器 (赋值给 'controls' 变量)
   controls = new OrbitControls(camera, renderer.domElement);
 
-  // 6. IFC Loader
   ifcLoader = new IFCLoader();
   ifcLoader.ifcManager.setWasmPath('/'); 
 
-  // 7. 渲染循环
   const animate = () => {
     requestAnimationFrame(animate);
     controls.update();
@@ -127,15 +105,11 @@ onMounted(() => {
   };
   animate();
   
-  // **********************************
-  // ***** 修复 1: 窗口尺寸调整逻辑 *****
-  // **********************************
   resizeHandler = () => {
     if (container) {
       const width = container.clientWidth;
       const height = container.clientHeight;
       
-      // 检查宽高是否有效，防止为 0
       if (width > 0 && height > 0) {
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
@@ -146,11 +120,9 @@ onMounted(() => {
   
   window.addEventListener('resize', resizeHandler);
   
-  // 在 onMounted 末尾手动调用一次，以设置正确的初始尺寸
   setTimeout(resizeHandler, 0);
 });
 
-// 在组件卸载时移除监听器
 onBeforeUnmount(() => {
   if (renderer) {
     renderer.dispose();
@@ -163,7 +135,6 @@ onBeforeUnmount(() => {
   }
 });
 
-// 9. 文件加载函数
 const loadIfcFile = (event: Event) => {
   const input = event.target as HTMLInputElement;
 
@@ -189,9 +160,6 @@ const loadIfcFile = (event: Event) => {
         currentModel = model as THREE.Object3D;
         scene.add(currentModel);
 
-        // ****************************
-        // ***** 修复 2: 调用对焦 *****
-        // ****************************
         frameModel(currentModel);
 
         hasModelLoaded.value = true;
